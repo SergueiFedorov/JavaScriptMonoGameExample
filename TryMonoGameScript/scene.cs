@@ -68,6 +68,8 @@ namespace TryMonoGameScript
 
         public void Update(GameTime gameTime)
         {
+            CallMemberFunction("update", gameTime.ElapsedGameTime.Milliseconds);
+
             foreach (Sprite sprite in sprites)
             {
                 sprite.Update(gameTime);

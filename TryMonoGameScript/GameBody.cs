@@ -61,16 +61,19 @@ namespace TryMonoGameScript
             this.spriteBatch = new SpriteBatch(GraphicsDevice);
 
             engine.ExecuteFile("Math.js");
-            engine.ExecuteFile("CommonClasses.js");
 
             engine.SetGlobalValue("sprite", new SpriteConstructor(engine, Content));
             engine.SetGlobalValue("scene", new SceneConstructor(engine, this.spriteBatch));
 
-            engine.Execute("currentScene = new scene();");
+            engine.SetGlobalFunction("setCurrentScene", new Func<Scene,Jurassic.Null>((Scene sceneToAdd) =>
+            {
+                currentScene = sceneToAdd;
+                return null;
+            }));
 
-            currentScene = engine.GetGlobalValue<Scene>("currentScene");
+            //engine.Execute("currentScene = new scene();");
 
-            engine.ExecuteFile("scene.js");
+            //currentScene = engine.GetGlobalValue<Scene>("currentScene");
 
             engine.SetGlobalFunction("print", new Func<string, int>((string message) =>
             {
@@ -78,6 +81,8 @@ namespace TryMonoGameScript
 
                 return 0;
             }));
+
+            engine.ExecuteFile("myGame.js");
             
             base.Initialize();
         }
@@ -110,7 +115,10 @@ namespace TryMonoGameScript
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            currentScene.Update(gameTime);
+            if (currentScene != null)
+            {
+                currentScene.Update(gameTime);
+            }
 
             base.Update(gameTime);
         }
@@ -123,8 +131,10 @@ namespace TryMonoGameScript
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            currentScene.Draw();
-
+            if (currentScene != null)
+            {
+                currentScene.Draw();
+            }
 
             base.Draw(gameTime);
         }
