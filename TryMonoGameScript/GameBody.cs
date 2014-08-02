@@ -48,6 +48,8 @@ namespace TryMonoGameScript
 
         int iterator = 0;
 
+        Scene currentScene;
+
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
         /// This is where it can query for any required services and load any non-graphic
@@ -56,9 +58,18 @@ namespace TryMonoGameScript
         /// </summary>
         protected override void Initialize()
         {
+            this.spriteBatch = new SpriteBatch(GraphicsDevice);
+
             engine.ExecuteFile("Math.js");
             engine.ExecuteFile("CommonClasses.js");
-            engine.ExecuteFile("VariableBridge.js");
+
+            engine.SetGlobalValue("sprite", new SpriteConstructor(engine, Content));
+            engine.SetGlobalValue("scene", new SceneConstructor(engine, this.spriteBatch));
+
+            engine.Execute("currentScene = new scene();");
+
+            currentScene = engine.GetGlobalValue<Scene>("currentScene");
+
             engine.ExecuteFile("scene.js");
 
             engine.SetGlobalFunction("print", new Func<string, int>((string message) =>
@@ -67,41 +78,6 @@ namespace TryMonoGameScript
 
                 return 0;
             }));
-
-            engine.SetGlobalFunction("MonoGame_AddSprite", new Func<string, double, double, double, int>((string script, double x, double y, double rotation) =>
-            {
-                iterator++;
-                Sprite sprite =  new Sprite(script, this.Content, this.engine, new Vector2((float)x, (float)y), (float)rotation);
-                sprites.Add(iterator, sprite);
-                return iterator;
-            }));
-
-            engine.SetGlobalFunction("setTextureFor", new Func<int, string, int>((ID, texture) =>
-            {
-                Sprite sprite = sprites[ID];
-                sprite.texture = Content.Load<Texture2D>(texture);
-                return 0;
-            }));
-
-            engine.SetGlobalFunction("updateSprite", new Func<int, double, double, double, int>((ID, x, y, rotation) =>
-            {
-                Sprite sprite = sprites[ID];
-                sprite.position = new Vector2((float)x, (float)y);
-                sprite.rotation = (float)rotation;
-
-                return 0;
-            }));
-
-            using (FileStream stream = File.Open("scene.js", FileMode.Open))
-            {
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    string code = reader.ReadToEnd();
-                    engine.Execute(code);
-
-                    engine.Execute("currentScene.delegate.initialize()");
-                }
-            }
             
             base.Initialize();
         }
@@ -124,13 +100,6 @@ namespace TryMonoGameScript
             // TODO: Unload any non ContentManager content here
         }
 
-        void MonoGame_AddSprite(string script, double x, double y, double rotation)
-        {
-            //Sprite sprite = new Sprite(script, this.Content, this.engine, new Vector2((float)x, (float)y), (float)rotation);
-
-           // sprites.Add(sprite);
-        }
-
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -141,11 +110,7 @@ namespace TryMonoGameScript
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            engine.Execute("currentScene.updateInternal(" + gameTime.ElapsedGameTime.Milliseconds + ");");
-
-            //gameObject.Update(gameTime);
-
-            // TODO: Add your update logic here
+            currentScene.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -158,15 +123,8 @@ namespace TryMonoGameScript
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
+            currentScene.Draw();
 
-            foreach (KeyValuePair<int, Sprite> keyValue in sprites)
-            {
-                Sprite sprite = keyValue.Value;
-                spriteBatch.Draw(sprite.texture, sprite.position, null, Color.White, sprite.rotation, new Vector2(sprite.texture.Width / 2.0f, sprite.texture.Height / 2.0f), 1.0f, SpriteEffects.None, 0.0f);
-            }
-
-            spriteBatch.End();
 
             base.Draw(gameTime);
         }

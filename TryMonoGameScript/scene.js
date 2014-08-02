@@ -1,19 +1,12 @@
-﻿scene = function () {
+﻿
+for (var count = 0; count < 5; count++) {
+    var newSprite = new sprite(count * 100, count * 100, 0);
+    newSprite.setTexture("Sprite_logo");
 
-    var currentSprite = null;
-
-    this.initialize = function (gameTime) {
-
-        currentSprite = currentScene.addSprite('', new Vector2(0, 0), 0);
-        currentSprite.setTexture("Sprite_logo.jpg");
-
+    newSprite.update = function (gameTime) {
+        this.rotation += 0.001 * gameTime;
+        this.x += 0.1 * gameTime;
     }
 
-    this.update = function (gameTime) {
-        currentSprite.position.x += 0.5;
-        currentSprite.rotation += 0.001;
-    }
-
+    currentScene.addSprite(newSprite);
 }
-
-currentScene.delegate = new scene();

@@ -8,7 +8,7 @@ function Vector2(x, y) {
         var returnVector = new Vector2(this.x + vector.x, this.y + vector.y);
         return returnVector;
     }
-
+    
     this.sub = function (vector) {
         var returnVector = new Vector2(this.x - vector.x, this.y - vector.y);
         return returnVector;
