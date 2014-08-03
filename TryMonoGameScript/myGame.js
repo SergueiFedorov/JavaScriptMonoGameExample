@@ -1,5 +1,8 @@
 ﻿(function () {
 
+    obj = new testObject();
+    print(obj.myFunction("myMessage"));
+
     sceneOne = new scene();
 
     for (var count = 0; count < 30; count++) {

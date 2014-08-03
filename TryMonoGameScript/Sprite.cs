@@ -33,16 +33,7 @@ namespace TryMonoGameScript
         }
     }
 
-    class test : ObjectInstance
-    {
-        public test(ObjectInstance instance)
-            : base(instance)
-        {
-
-        }
-    }
-
-    class Sprite : ObjectInstance
+    public class Sprite : ObjectInstance
     {
 
         private Jurassic.ScriptEngine engine { get; set; }

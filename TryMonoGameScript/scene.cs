@@ -36,7 +36,7 @@ namespace TryMonoGameScript
 
     }
 
-    class Scene : ObjectInstance
+    public class Scene : ObjectInstance
     {
         List<Sprite> sprites = new List<Sprite>();
 

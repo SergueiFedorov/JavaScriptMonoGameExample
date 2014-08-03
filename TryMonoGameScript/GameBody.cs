@@ -16,6 +16,16 @@ using Jurassic;
 namespace TryMonoGameScript
 {
 
+    public class testClass
+    {
+        public string simpleString { get; set; }
+
+        public string myFunction(string message)
+        {
+            return message;
+        }
+    }
+
     /// <summary>
     /// This is the main type for your game
     /// </summary>
@@ -48,7 +58,14 @@ namespace TryMonoGameScript
 
         int iterator = 0;
 
-        Scene currentScene;
+        Scene currentScene { get; set; }
+
+        protected Jurassic.Null setCurrentScene(Scene scene)
+        {
+            currentScene = scene;
+            return null;
+        }
+
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -60,20 +77,18 @@ namespace TryMonoGameScript
         {
             this.spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            testClass myClass = new testClass();
+            ObjectBridge<testClass> myClassBridge = ObjectBridge<testClass>.createObject(engine, myClass);
+            testClass ts = (testClass)myClassBridge;
+
             engine.ExecuteFile("Math.js");
 
             engine.SetGlobalValue("sprite", new SpriteConstructor(engine, Content));
             engine.SetGlobalValue("scene", new SceneConstructor(engine, this.spriteBatch));
+            engine.SetGlobalValue("testObject", new ObjectBridgeConstructor<testClass>(engine, "testClass"));
 
-            engine.SetGlobalFunction("setCurrentScene", new Func<Scene,Jurassic.Null>((Scene sceneToAdd) =>
-            {
-                currentScene = sceneToAdd;
-                return null;
-            }));
+            engine.SetGlobalFunction("setCurrentScene", new Func<Scene, Jurassic.Null>(setCurrentScene));
 
-            //engine.Execute("currentScene = new scene();");
-
-            //currentScene = engine.GetGlobalValue<Scene>("currentScene");
 
             engine.SetGlobalFunction("print", new Func<string, int>((string message) =>
             {

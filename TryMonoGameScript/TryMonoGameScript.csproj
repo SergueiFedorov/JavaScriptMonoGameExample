@@ -38,13 +38,11 @@
     <Compile Include="GameBody.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rectangle.cs" />
     <Compile Include="scene.cs" />
     <Compile Include="Sprite.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Jurassic">
-      <HintPath>..\..\ASPXNetJavaScript\BasicPage\DLLS\Jurassic.dll</HintPath>
-    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>$(MSBuildExtensionsPath)\..\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
     </Reference>
@@ -66,7 +64,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Jurassic\Jurassic.csproj">
+      <Project>{2ce5502d-8710-4be3-9d90-201d526904b3}</Project>
+      <Name>Jurassic</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
