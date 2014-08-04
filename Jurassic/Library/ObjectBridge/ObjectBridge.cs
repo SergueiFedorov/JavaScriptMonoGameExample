@@ -29,38 +29,17 @@ namespace TryMonoGameScript
 
     }
 
-    public abstract class ObjectBridge : ObjectInstance 
+    public class ObjectBridge : ObjectInstance 
     {
         //Saves me calling getType() every time
         Type type;
 
-        protected ObjectBridge(ScriptEngine engine, object objectInstance)
+        protected ObjectBridge(ScriptEngine engine, object objectInstance, object[] resources)
             : base(engine)
         {
-            
+            this.resources = resources;
             this.objectInstance = objectInstance;
-        }
 
-        public object objectInstance { get; private set; }
-    }
-
-    public class ObjectBridge<T> : ObjectBridge
-    {
-        private Type ObjectType
-        {
-            get;
-            set;
-        }
-
-        private object[] resources
-        {
-            get;
-            set;
-        }
-
-        private ObjectBridge(ScriptEngine engine, T instance, object[] resources)
-            : base(engine, instance)
-        {
             this.resources = resources;
 
             this.applyResources();
@@ -71,20 +50,13 @@ namespace TryMonoGameScript
             base.PopulateFunctions();
         }
 
-        public static explicit operator T(ObjectBridge<T> bridge)
-        {
-            return (T)bridge.objectInstance;
-        }
-
-        private static object getBaseObject(ObjectBridge<T> bridge)
-        {
-            return bridge.objectInstance;
-        }
+        protected object objectInstance { get; private set; }
+        protected object[] resources { get; set; }
 
         private void applyResources()
         {
-            PropertyInfo[] properties = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            for (int x = 0;resources != null &&  x < resources.Length; x++)
+            PropertyInfo[] properties = this.objectInstance.GetType().GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            for (int x = 0; resources != null && x < resources.Length; x++)
             {
                 properties[x].SetValue(this.objectInstance, this.resources[x], null);
             }
@@ -102,9 +74,9 @@ namespace TryMonoGameScript
 
         private void registerFunctions()
         {
-            foreach (MethodInfo info in typeof(T).GetMethods())
+            foreach (MethodInfo info in this.objectInstance.GetType().GetMethods())
             {
-                routingDelegate reoutingDelegate = 
+                routingDelegate reoutingDelegate =
                     ((arg1, arg2, arg3, arg4, arg5, arg6) =>
                     {
                         //I will have to find a better way to do this, but for now you can have up to 6
@@ -132,7 +104,7 @@ namespace TryMonoGameScript
 
         private bool allowedProperty(PropertyInfo info)
         {
-            return info.PropertyType == typeof(int)    ||
+            return info.PropertyType == typeof(int) ||
                    info.PropertyType == typeof(double) ||
                    info.PropertyType == typeof(string);
         }
@@ -149,7 +121,7 @@ namespace TryMonoGameScript
             //////////PROPERTIES/////////////////
             ///TODO: Split into two functions////
 
-            PropertyInfo[] properties = typeof(T).GetProperties();
+            PropertyInfo[] properties = this.objectInstance.GetType().GetProperties();
 
             foreach (PropertyInfo info in properties)
             {
@@ -182,10 +154,10 @@ namespace TryMonoGameScript
                         if (setMethod != null)
                         {
                             routingDelegate del = new routingDelegate((arg1, arg2, arg3, arg4, arg5, arg6) =>
-                                                                      {
-                                                                          object[] parameters = new object[] { arg1, arg2, arg3, arg4, arg5, arg6 }.Take(setMethod.GetParameters().Count()).ToArray();
-                                                                          return setMethod.Invoke(this.objectInstance, parameters);
-                                                                      });
+                            {
+                                object[] parameters = new object[] { arg1, arg2, arg3, arg4, arg5, arg6 }.Take(setMethod.GetParameters().Count()).ToArray();
+                                return setMethod.Invoke(this.objectInstance, parameters);
+                            });
 
                             setter = new ClrFunction(Engine.Function.InstancePrototype, del, setMethod.Name);
                         }
@@ -203,14 +175,14 @@ namespace TryMonoGameScript
 
             //////Fields////////
 
-            FieldInfo[] fields = typeof(T).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public );
+            FieldInfo[] fields = this.objectInstance.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
             foreach (FieldInfo info in fields)
             {
                 if (allowedField(info))
                 {
                     base.SetPropertyValue(info.Name, info.GetValue(this.objectInstance), true);
-                        
+
                     routingDelegate del = new routingDelegate((arg1, arg2, arg3, arg4, arg5, arg6) =>
                     {
                         if (arg1.GetType() != typeof(Undefined))
@@ -229,10 +201,43 @@ namespace TryMonoGameScript
             }
         }
 
+    }
+
+    public class ObjectBridge<T> : ObjectBridge
+    {
+        private Type ObjectType
+        {
+            get;
+            set;
+        }
+
+        private object[] resources
+        {
+            get;
+            set;
+        }
+
+        private ObjectBridge(ScriptEngine engine, T instance, object[] resources)
+            : base(engine, instance, resources)
+        {
+
+        }
+
+        public static explicit operator T(ObjectBridge<T> bridge)
+        {
+            return (T)bridge.objectInstance;
+        }
+
+        private static object getBaseObject(ObjectBridge<T> bridge)
+        {
+            return bridge.objectInstance;
+        }
+
         public static ObjectBridge<T> createObject(ScriptEngine engine, T instance, object[] resources)
         {
             ObjectBridge<T> bridge = new ObjectBridge<T>(engine, instance, resources);
             return bridge;
         }
+
     }
 }
