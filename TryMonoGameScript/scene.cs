@@ -15,42 +15,17 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace TryMonoGameScript
-{
-    class SceneConstructor : ClrFunction
+{    
+    public class Scene
     {
-
-        SpriteBatch batch;
-
-        public SceneConstructor(ScriptEngine engine, SpriteBatch batch)
-           : base(engine.Function.InstancePrototype, "scene",
-                    new Scene(engine.Function.InstancePrototype, batch))
-        {
-            this.batch = batch;
-        }
-
-        [JSConstructorFunction]
-        public Scene construct()
-        {
-            return new Scene(this.InstancePrototype, this.batch);
-        }
-
-    }
-
-    public class Scene : ObjectInstance
-    {
+        SpriteBatch batch { get; set; }
         List<Sprite> sprites = new List<Sprite>();
 
-        SpriteBatch batch;
-
-        public Scene(ObjectInstance instance, SpriteBatch batch)
-            : base(instance)
+        public Scene()
         {
-            this.batch = batch;
-            this.PopulateFields();
-            this.PopulateFunctions();
+
         }
 
-        [JSFunction(Name = "addSprite")]
         public void addSprite(Sprite sprite)
         {
             sprites.Add(sprite);
@@ -68,8 +43,6 @@ namespace TryMonoGameScript
 
         public void Update(GameTime gameTime)
         {
-            CallMemberFunction("update", gameTime.ElapsedGameTime.Milliseconds);
-
             foreach (Sprite sprite in sprites)
             {
                 sprite.Update(gameTime);

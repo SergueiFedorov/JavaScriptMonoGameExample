@@ -15,6 +15,7 @@ using Jurassic.Library;
 
 namespace TryMonoGameScript
 {
+    /*
     class SpriteConstructor : ClrFunction
     {
         ContentManager content;
@@ -31,25 +32,21 @@ namespace TryMonoGameScript
         {
             return new Sprite(this.InstancePrototype, this.content, new Vector2((float)x, (float)y), (double)rotation);
         }
-    }
+    }*/
 
-    public class Sprite : ObjectInstance
+    public class Sprite
     {
 
-        private Jurassic.ScriptEngine engine { get; set; }
-        private string scriptFile { get; set; }
-        private ContentManager Content { get; set; }
+        public ContentManager Content { get; set; }
+
+        //public Jurassic.ScriptEngine engine { get; set; }
+        //public string scriptFile { get; set; }
 
         public Texture2D texture { get; set; }
         public Vector2 position { get; set; }
-
-        [JSProperty(Name = "rotation")]
         public double rotation { get; set; }
-
-        [JSProperty(Name = "scale")]
         public double scale { get; set; }
 
-        [JSProperty(Name = "x")]
         public double x
         {
             get
@@ -75,6 +72,12 @@ namespace TryMonoGameScript
             }
         }
 
+        public Sprite()
+        {
+
+        }
+
+        /*
         public Sprite(ObjectInstance instance, ContentManager content)
             : base(instance)
         {
@@ -92,23 +95,24 @@ namespace TryMonoGameScript
             this.rotation = rotation;
 
             this.scale = 1.0;
-        }
+        }*/
+
         void Initialize()
         {
 
         }
 
-        [JSFunction(Name = "setTexture")]
         public int SetTexture(string name)
         {
             this.texture = Content.Load<Texture2D>(name);
+            this.scale = 1.0f;
 
             return 0;
         }
 
         public void Update(GameTime gameTime)
         {
-            base.CallMemberFunction("update", gameTime.ElapsedGameTime.Milliseconds);
+            //base.CallMemberFunction("update", gameTime.ElapsedGameTime.Milliseconds);
         }
     }
 }

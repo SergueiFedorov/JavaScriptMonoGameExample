@@ -18,7 +18,19 @@ namespace TryMonoGameScript
 
     public class testClass
     {
-        public string simpleString { get; set; }
+
+        private string _simpleString;
+        public string simpleString 
+        {
+            get
+            {
+                return "simpleString";
+            }
+            set
+            {
+                _simpleString = value;
+            }
+        }
 
         public string myFunction(string message)
         {
@@ -58,13 +70,7 @@ namespace TryMonoGameScript
 
         int iterator = 0;
 
-        Scene currentScene { get; set; }
-
-        protected Jurassic.Null setCurrentScene(Scene scene)
-        {
-            currentScene = scene;
-            return null;
-        }
+        ObjectBridge<Scene> currentScene { get; set; }
 
 
         /// <summary>
@@ -77,18 +83,20 @@ namespace TryMonoGameScript
         {
             this.spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            testClass myClass = new testClass();
-            ObjectBridge<testClass> myClassBridge = ObjectBridge<testClass>.createObject(engine, myClass);
-            testClass ts = (testClass)myClassBridge;
+            object[] spriteResources = new object[] { Content };
+            ObjectBridgeConstructor<Sprite> spriteBridge = new ObjectBridgeConstructor<Sprite>(this.engine, "sprite", spriteResources);
+
+            object[] sceneResources = new object[] { spriteBatch };
+            ObjectBridgeConstructor<Scene> sceeneBridge = new ObjectBridgeConstructor<Scene>(this.engine, "scene", sceneResources);
 
             engine.ExecuteFile("Math.js");
+            
+            engine.SetGlobalValue("Sprite", spriteBridge);
+            engine.SetGlobalValue("Scene", sceeneBridge);
 
-            engine.SetGlobalValue("sprite", new SpriteConstructor(engine, Content));
-            engine.SetGlobalValue("scene", new SceneConstructor(engine, this.spriteBatch));
-            engine.SetGlobalValue("testObject", new ObjectBridgeConstructor<testClass>(engine, "testClass"));
+            engine.Execute("currentScene = new Scene();");
 
-            engine.SetGlobalFunction("setCurrentScene", new Func<Scene, Jurassic.Null>(setCurrentScene));
-
+            currentScene = engine.Evaluate<ObjectBridge<Scene>>("currentScene");
 
             engine.SetGlobalFunction("print", new Func<string, int>((string message) =>
             {
@@ -130,9 +138,11 @@ namespace TryMonoGameScript
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            Scene sceneObject = (Scene)currentScene;
+
             if (currentScene != null)
             {
-                currentScene.Update(gameTime);
+                sceneObject.Update(gameTime);
             }
 
             base.Update(gameTime);
@@ -146,9 +156,11 @@ namespace TryMonoGameScript
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            Scene sceneObject = (Scene)currentScene;
+
             if (currentScene != null)
             {
-                currentScene.Draw();
+                sceneObject.Draw();
             }
 
             base.Draw(gameTime);
