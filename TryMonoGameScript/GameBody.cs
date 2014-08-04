@@ -89,12 +89,17 @@ namespace TryMonoGameScript
             object[] sceneResources = new object[] { spriteBatch };
             ObjectBridgeConstructor<Scene> sceeneBridge = new ObjectBridgeConstructor<Scene>(this.engine, "scene", sceneResources);
 
+            ObjectBridgeConstructor<Rectangle> rectangleBridge = new ObjectBridgeConstructor<Rectangle>(this.engine, "Rectangle", null);
+
             engine.ExecuteFile("Math.js");
-            
+            engine.ExecuteFile("GameFunctions.js");
+
             engine.SetGlobalValue("Sprite", spriteBridge);
             engine.SetGlobalValue("Scene", sceeneBridge);
+            engine.SetGlobalValue("Rectangle", rectangleBridge);
 
             engine.Execute("currentScene = new Scene();");
+            
 
             currentScene = engine.Evaluate<ObjectBridge<Scene>>("currentScene");
 
@@ -106,6 +111,7 @@ namespace TryMonoGameScript
             }));
 
             engine.ExecuteFile("myGame.js");
+
             
             base.Initialize();
         }
@@ -137,6 +143,8 @@ namespace TryMonoGameScript
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            engine.Execute("Update(" + gameTime.ElapsedGameTime.Milliseconds + ");");
 
             Scene sceneObject = (Scene)currentScene;
 

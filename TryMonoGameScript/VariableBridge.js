@@ -1,1 +1,0 @@
-﻿currentScene = new scene();

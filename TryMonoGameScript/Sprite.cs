@@ -39,8 +39,7 @@ namespace TryMonoGameScript
 
         public ContentManager Content { get; set; }
 
-        //public Jurassic.ScriptEngine engine { get; set; }
-        //public string scriptFile { get; set; }
+        public double someFloat = 10.0;
 
         public Texture2D texture { get; set; }
         public Vector2 position { get; set; }
